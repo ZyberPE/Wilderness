@@ -1,0 +1,13 @@
+cooldown: 60
+
+teleport:
+  world: world
+  min-x: -5000
+  max-x: 5000
+  min-z: -5000
+  max-z: 5000
+
+messages:
+  teleporting: "§aTeleporting you into the wilderness..."
+  success: "§aYou have been teleported!"
+  cooldown: "§cYou must wait {time}s before using /wild again."

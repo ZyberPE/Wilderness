@@ -3,11 +3,11 @@
 namespace Wilderness;
 
 use pocketmine\plugin\PluginBase;
+use pocketmine\event\Listener;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
-use pocketmine\event\Listener;
 use pocketmine\event\entity\EntityDamageEvent;
 
 class Main extends PluginBase implements Listener {
@@ -15,12 +15,12 @@ class Main extends PluginBase implements Listener {
     private array $cooldowns = [];
     private array $noFall = [];
 
-    public function onEnable(): void {
+    public function onEnable(): void{
         $this->saveDefaultConfig();
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
     }
 
-    public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool {
+    public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool{
 
         if(!$sender instanceof Player){
             return true;
@@ -35,10 +35,11 @@ class Main extends PluginBase implements Listener {
                     $time = time() - $this->cooldowns[$sender->getName()];
 
                     if($time < $cooldown){
+
                         $remaining = $cooldown - $time;
 
                         $msg = $this->getConfig()->getNested("messages.cooldown");
-                        $msg = str_replace("{time}", $remaining, $msg);
+                        $msg = str_replace("{time}", (string)$remaining, $msg);
 
                         $sender->sendMessage($msg);
                         return true;
@@ -59,27 +60,43 @@ class Main extends PluginBase implements Listener {
             $minZ = $this->getConfig()->getNested("teleport.min-z");
             $maxZ = $this->getConfig()->getNested("teleport.max-z");
 
-            $x = mt_rand($minX, $maxX);
-            $z = mt_rand($minZ, $maxZ);
-
-            $y = $world->getHighestBlockAt($x, $z) + 1;
-
-            $pos = new Position($x, $y, $z, $world);
-
             $sender->sendMessage($this->getConfig()->getNested("messages.teleporting"));
 
-            $sender->teleport($pos);
+            for($i = 0; $i < 10; $i++){
 
-            $sender->sendMessage($this->getConfig()->getNested("messages.success"));
+                $x = mt_rand($minX, $maxX);
+                $z = mt_rand($minZ, $maxZ);
 
-            $this->cooldowns[$sender->getName()] = time();
-            $this->noFall[$sender->getName()] = true;
+                $chunkX = $x >> 4;
+                $chunkZ = $z >> 4;
+
+                $world->loadChunk($chunkX, $chunkZ);
+
+                if(!$world->isChunkLoaded($chunkX, $chunkZ)){
+                    continue;
+                }
+
+                $y = $world->getHighestBlockAt($x, $z) + 1;
+
+                $pos = new Position($x, $y, $z, $world);
+
+                $sender->teleport($pos);
+
+                $sender->sendMessage($this->getConfig()->getNested("messages.success"));
+
+                $this->cooldowns[$sender->getName()] = time();
+                $this->noFall[$sender->getName()] = true;
+
+                return true;
+            }
+
+            $sender->sendMessage("§cFailed to find a safe location. Try again.");
         }
 
         return true;
     }
 
-    public function onDamage(EntityDamageEvent $event): void {
+    public function onDamage(EntityDamageEvent $event): void{
 
         $entity = $event->getEntity();
 

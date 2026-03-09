@@ -1,0 +1,17 @@
+name: Wilderness
+main: Wilderness\Main
+version: 1.0.0
+api: 5.0.0
+author: ZyberPE
+
+commands:
+  wild:
+    description: Teleport randomly into the wilderness
+    usage: /wild
+    permission: wild.use
+
+permissions:
+  wild.use:
+    default: true
+  wild.bypass:
+    default: false

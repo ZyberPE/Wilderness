@@ -8,8 +8,8 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
-use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\world\World;
+use pocketmine\event\entity\EntityDamageEvent;
 
 class Main extends PluginBase implements Listener{
 
@@ -65,8 +65,8 @@ class Main extends PluginBase implements Listener{
 
         $sender->sendMessage($this->getConfig()->getNested("messages.teleporting"));
 
-        // Try many locations
-        for($i = 0; $i < 60; $i++){
+        // Try up to 80 random locations
+        for($i = 0; $i < 80; $i++){
 
             $x = mt_rand($minX, $maxX);
             $z = mt_rand($minZ, $maxZ);
@@ -74,14 +74,7 @@ class Main extends PluginBase implements Listener{
             $chunkX = $x >> 4;
             $chunkZ = $z >> 4;
 
-            // Ensure chunk exists
-            if(!$world->isChunkLoaded($chunkX,$chunkZ)){
-                $world->loadChunk($chunkX,$chunkZ);
-            }
-
-            if(!$world->isChunkGenerated($chunkX,$chunkZ)){
-                $world->generateChunk($chunkX,$chunkZ);
-            }
+            $world->loadChunk($chunkX, $chunkZ);
 
             if(!$world->isChunkLoaded($chunkX,$chunkZ)){
                 continue;

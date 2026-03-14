@@ -2,10 +2,10 @@ cooldown: 60
 
 teleport:
   world: world
-  min-x: -5000
-  max-x: 5000
-  min-z: -5000
-  max-z: 5000
+  min-x: -1000
+  max-x: 2000
+  min-z: -2000
+  max-z: 1000
 
 messages:
   teleporting: "§eSearching for a wilderness location..."

@@ -8,6 +8,6 @@ teleport:
   max-z: 5000
 
 messages:
-  teleporting: "§aTeleporting you into the wilderness..."
-  success: "§aYou have been teleported!"
-  cooldown: "§cYou must wait {time}s before using /wild again."
+  teleporting: "§eSearching for a wilderness location..."
+  success: "§aTeleported to the wilderness!"
+  cooldown: "§cYou must wait {time} seconds before using /wild again."

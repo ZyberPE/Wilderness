@@ -9,15 +9,16 @@ use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\block\VanillaBlocks;
 
-class Main extends PluginBase implements Listener {
+class Main extends PluginBase implements Listener{
 
     private array $cooldowns = [];
     private array $noFall = [];
 
     public function onEnable(): void{
         $this->saveDefaultConfig();
-        $this->getServer()->getPluginManager()->registerEvents($this, $this);
+        $this->getServer()->getPluginManager()->registerEvents($this,$this);
     }
 
     public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool{
@@ -62,7 +63,8 @@ class Main extends PluginBase implements Listener {
 
             $sender->sendMessage($this->getConfig()->getNested("messages.teleporting"));
 
-            for($i = 0; $i < 10; $i++){
+            // Try 50 locations instead of 10
+            for($i = 0; $i < 50; $i++){
 
                 $x = mt_rand($minX, $maxX);
                 $z = mt_rand($minZ, $maxZ);
@@ -72,13 +74,31 @@ class Main extends PluginBase implements Listener {
 
                 $world->loadChunk($chunkX, $chunkZ);
 
-                if(!$world->isChunkLoaded($chunkX, $chunkZ)){
+                $y = $world->getHighestBlockAt($x,$z);
+
+                $ground = $world->getBlockAt($x,$y,$z);
+                $above = $world->getBlockAt($x,$y + 1,$z);
+                $above2 = $world->getBlockAt($x,$y + 2,$z);
+
+                // Must be solid ground
+                if(!$ground->isSolid()){
                     continue;
                 }
 
-                $y = $world->getHighestBlockAt($x, $z) + 1;
+                // Must have air above
+                if(!$above->isTransparent() || !$above2->isTransparent()){
+                    continue;
+                }
 
-                $pos = new Position($x, $y, $z, $world);
+                // Avoid lava and water
+                if(
+                    $ground->getTypeId() === VanillaBlocks::LAVA()->getTypeId() ||
+                    $ground->getTypeId() === VanillaBlocks::WATER()->getTypeId()
+                ){
+                    continue;
+                }
+
+                $pos = new Position($x,$y + 1,$z,$world);
 
                 $sender->teleport($pos);
 
